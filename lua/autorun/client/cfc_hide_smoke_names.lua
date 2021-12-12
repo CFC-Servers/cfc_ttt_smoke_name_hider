@@ -53,31 +53,35 @@ hook.Add("EntityRemoved", "CFC_SmokeNameHider_TrackSmoke", function(ent)
     end
 end)
 
-function RADIO:GetTargetType()
-    if not IsValid(LocalPlayer()) then return end
-    local trace = LocalPlayer():GetEyeTrace(MASK_SHOT)
 
-    if not trace or (not trace.Hit) or (not IsValid(trace.Entity)) then return end
-    if LineIntersectsWithSmoke(trace.StartPos, trace.HitPos) then
-        return "quick_nobody", true
-    end
-
-    local ent = trace.Entity
-
-    if ent:IsPlayer() and ent:IsTerror() then
-        if ent:GetNWBool("disguised", false) then
-            return "quick_disg", true
-        else
-            return ent, false
+hook.Add( "InitPostEntity",  "CFC_SmokeNameHider_OverwriteRadio", function()
+    function RADIO:GetTargetType()
+        if not IsValid(LocalPlayer()) then return end
+        local trace = LocalPlayer():GetEyeTrace(MASK_SHOT)
+    
+        if not trace or (not trace.Hit) or (not IsValid(trace.Entity)) then return end
+        if LineIntersectsWithSmoke(trace.StartPos, trace.HitPos) then
+            return "quick_nobody", true
         end
-    elseif ent:GetClass() == "prop_ragdoll" and CORPSE.GetPlayerNick(ent, "") != "" then
-
-        if DetectiveMode() and not CORPSE.GetFound(ent, false) then
-            return "quick_corpse", isInside or true
-        else
-            return ent, false
+    
+        local ent = trace.Entity
+    
+        if ent:IsPlayer() and ent:IsTerror() then
+            if ent:GetNWBool("disguised", false) then
+                return "quick_disg", true
+            else
+                return ent, false
+            end
+        elseif ent:GetClass() == "prop_ragdoll" and CORPSE.GetPlayerNick(ent, "") != "" then
+    
+            if DetectiveMode() and not CORPSE.GetFound(ent, false) then
+                return "quick_corpse", isInside or true
+            else
+                return ent, false
+            end
         end
     end
-end
+end )
+
 
 
